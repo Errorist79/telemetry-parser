@@ -121,7 +121,12 @@ impl Dji {
                         }
 
                         let v = serde_json::to_value(&clip).map_err(|_| Error::new(ErrorKind::Other, "Serialize error"));
-                        if let Ok(vv) = v {
+                        if let Ok(mut vv) = v {
+                            if let (Some(obj), Some(stream)) = (vv.as_object_mut(), &$parsed.stream_meta) {
+                                if let Ok(serde_json::Value::Object(stream_obj)) = serde_json::to_value(stream) {
+                                    obj.extend(stream_obj);
+                                }
+                            }
                             log::debug!("Metadata: {:?}", &vv);
                             insert_tag(&mut tag_map, tag!(parsed GroupId::Default, TagId::Metadata, "Metadata", Json, |v| serde_json::to_string(v).unwrap(), vv, vec![]), &options);
                         }
