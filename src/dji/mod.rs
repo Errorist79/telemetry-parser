@@ -152,6 +152,10 @@ impl Dji {
                             exposure_time = e.exposure_time.as_ref().and_then(|v| Some(*v.exposure_time.get(0)? as f64 / *v.exposure_time.get(1)? as f64)).unwrap_or_default() * 1000.0;
 
                             // log::debug!("Exposure time: {:?}", &exposure_time);
+
+                            if let Ok(vv) = serde_json::to_value(e) {
+                                insert_tag(&mut tag_map, tag!(parsed GroupId::Default, TagId::Custom("CameraFrameMeta".into()), "Camera frame metadata", Json, |v| serde_json::to_string(v).unwrap(), vv, vec![]), &options);
+                            }
                         }
 
                         if let Some(ref imu) = frame.imu_frame_meta {
